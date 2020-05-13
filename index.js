@@ -1,5 +1,6 @@
 const { Engine, Render, Runner, World, Bodies } = Matter;
 
+const cells = 3;
 const width = 600;
 const height = 600;
 
@@ -39,3 +40,35 @@ const walls = [
 ];
 
 World.add(world, walls);
+
+const arrayFactory = (x, y) =>
+  Array(x)
+    .fill(null)
+    .map(() => Array(y).fill(false));
+
+const grid = arrayFactory(cells, cells);
+const verticals = arrayFactory(cells, cells-1);
+const horizontals = arrayFactory(cells-1, cells);
+
+const startRow = Math.floor(Math.random()*cells)
+const startColumn = Math.floor(Math.random()*cells)
+
+const iterateMaze = (row, column) => {
+  //if cell has been visited then return early
+
+  //mark cell as visited
+
+  //assemble randomly-ordered list of neighbors
+
+  //for each neighbor...
+
+  //see if neighbor is out of bounds
+
+  //if we have visited neighbor, visit next neighbor
+
+  //remove a wall from horizontals or verticals
+
+  //visit next cell
+};
+
+iterateMaze(startRow, startColumn)
