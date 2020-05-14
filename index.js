@@ -3,6 +3,7 @@ const { Engine, Render, Runner, World, Bodies } = Matter;
 const cells = 3;
 const width = 600;
 const height = 600;
+const unitLength = width / cells;
 
 const engine = Engine.create();
 const { world } = engine;
@@ -46,29 +47,110 @@ const arrayFactory = (x, y) =>
     .fill(null)
     .map(() => Array(y).fill(false));
 
-const grid = arrayFactory(cells, cells);
-const verticals = arrayFactory(cells, cells-1);
-const horizontals = arrayFactory(cells-1, cells);
+const shuffle = (arr) => {
+  let counter = arr.length;
 
-const startRow = Math.floor(Math.random()*cells)
-const startColumn = Math.floor(Math.random()*cells)
+  while (counter > 0) {
+    let index = Math.floor(Math.random() * counter);
+
+    counter--;
+
+    const temp = arr[counter];
+    arr[counter] = arr[index];
+    arr[index] = temp;
+  }
+
+  return arr;
+};
+
+const grid = arrayFactory(cells, cells);
+const verticals = arrayFactory(cells, cells - 1);
+const horizontals = arrayFactory(cells - 1, cells);
+
+const startRow = Math.floor(Math.random() * cells);
+const startColumn = Math.floor(Math.random() * cells);
 
 const iterateMaze = (row, column) => {
   //if cell has been visited then return early
+  if (grid[row][column]) return;
 
   //mark cell as visited
-
+  grid[row][column] = true;
   //assemble randomly-ordered list of neighbors
-
+  const neighbors = shuffle([
+    [row - 1, column, "up"],
+    [row, column + 1, "right"],
+    [row + 1, column, "down"],
+    [row, column - 1, "left"],
+  ]);
   //for each neighbor...
+  for (let neighbor of neighbors) {
+    const [nextRow, nextColumn, direction] = neighbor;
 
-  //see if neighbor is out of bounds
+    //see if neighbor is out of bounds
+    if (
+      nextRow < 0 ||
+      nextRow >= cells ||
+      nextColumn < 0 ||
+      nextColumn >= cells
+    ) {
+      continue;
+    }
 
-  //if we have visited neighbor, visit next neighbor
+    //if we have visited neighbor, visit next neighbor
+    if (grid[nextRow][nextColumn]) {
+      continue;
+    }
 
-  //remove a wall from horizontals or verticals
+    //remove a wall from horizontals or verticals
+    if (direction === "left") {
+      verticals[row][column - 1] = true;
+    } else if (direction === "right") {
+      verticals[row][column] = true;
+    } else if (direction === "up") {
+      horizontals[row - 1][column] = true;
+    } else if (direction === "down") {
+      horizontals[row][column] = true;
+    }
+
+    iterateMaze(nextRow, nextColumn);
+  }
 
   //visit next cell
 };
 
-iterateMaze(startRow, startColumn)
+iterateMaze(1, 1);
+
+horizontals.forEach((row, rowIndex) => {
+  row.forEach((open, columnIndex) => {
+    if (open) return;
+
+    const wall = Bodies.rectangle(
+      columnIndex * unitLength + unitLength / 2,
+      rowIndex * unitLength + unitLength,
+      unitLength,
+      10,
+      {
+        isStatic: true
+      }
+    );
+    World.add(world, wall)
+  });
+});
+
+verticals.forEach((row, rowIndex) => {
+  row.forEach((open, columnIndex) => {
+    if (open) return;
+
+    const wall = Bodies.rectangle(
+      columnIndex * unitLength + unitLength,
+      rowIndex * unitLength + unitLength / 2,
+      10,
+      unitLength,
+      {
+        isStatic: true
+      }
+    );
+    World.add(world, wall)
+  });
+});
