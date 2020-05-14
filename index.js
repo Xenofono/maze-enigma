@@ -1,4 +1,4 @@
-const { Engine, Render, Runner, World, Bodies } = Matter;
+const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
 
 const cells = 3;
 const width = 600;
@@ -6,6 +6,7 @@ const height = 600;
 const unitLength = width / cells;
 
 const engine = Engine.create();
+engine.world.gravity.y = 0;
 const { world } = engine;
 const render = Render.create({
   element: document.body,
@@ -26,16 +27,16 @@ const shape = Bodies.rectangle(0, 0, 50, 50, {
 
 //walls
 const walls = [
-  Bodies.rectangle(width / 2, 0, width, 40, {
+  Bodies.rectangle(width / 2, 0, width, 2, {
     isStatic: true,
   }),
-  Bodies.rectangle(width, height / 2, 40, height, {
+  Bodies.rectangle(width, height / 2, 2, height, {
     isStatic: true,
   }),
-  Bodies.rectangle(width / 2, height, width, 40, {
+  Bodies.rectangle(width / 2, height, width, 2, {
     isStatic: true,
   }),
-  Bodies.rectangle(0, height / 2, 40, height, {
+  Bodies.rectangle(0, height / 2, 2, height, {
     isStatic: true,
   }),
 ];
@@ -131,10 +132,10 @@ horizontals.forEach((row, rowIndex) => {
       unitLength,
       10,
       {
-        isStatic: true
+        isStatic: true,
       }
     );
-    World.add(world, wall)
+    World.add(world, wall);
   });
 });
 
@@ -148,9 +149,58 @@ verticals.forEach((row, rowIndex) => {
       10,
       unitLength,
       {
-        isStatic: true
+        isStatic: true,
       }
     );
-    World.add(world, wall)
+    World.add(world, wall);
+  });
+});
+
+//goal of game is to get player to this object
+const goal = Bodies.rectangle(
+  width - unitLength / 2,
+  height - unitLength / 2,
+  unitLength * 0.7,
+  unitLength * 0.7,
+  { isStatic: true, label: "goal" }
+);
+
+World.add(world, goal);
+
+//player
+
+const ball = Bodies.circle(unitLength / 2, unitLength / 2, unitLength * 0.25, {
+  label: "player",
+});
+World.add(world, ball);
+
+document.addEventListener("keydown", ({ keyCode }) => {
+  const { x, y } = ball.velocity;
+  switch (keyCode) {
+    case 87:
+      Body.setVelocity(ball, { x, y: y - 5 });
+      break;
+    case 68:
+      Body.setVelocity(ball, { x: x + 5, y: 0 });
+      break;
+    case 83:
+      Body.setVelocity(ball, { x, y: y + 5 });
+      break;
+    case 65:
+      Body.setVelocity(ball, { x: x - 5, y: 0 });
+
+      break;
+  }
+});
+
+//win condition
+
+Events.on(engine, "collisionStart", (event) => {
+  event.pairs.forEach((pair) => {
+    const labels = ['player', 'goal'];
+
+    if(labels.includes(pair.bodyA.label) && labels.includes(pair.bodyB.label)){
+      console.log("user won")
+    }
   });
 });
