@@ -133,6 +133,7 @@ horizontals.forEach((row, rowIndex) => {
       10,
       {
         isStatic: true,
+        label: "wall",
       }
     );
     World.add(world, wall);
@@ -150,6 +151,7 @@ verticals.forEach((row, rowIndex) => {
       unitLength,
       {
         isStatic: true,
+        label: "wall",
       }
     );
     World.add(world, wall);
@@ -197,10 +199,14 @@ document.addEventListener("keydown", ({ keyCode }) => {
 
 Events.on(engine, "collisionStart", (event) => {
   event.pairs.forEach((pair) => {
-    const labels = ['player', 'goal'];
+    const labels = ["player", "goal"];
 
-    if(labels.includes(pair.bodyA.label) && labels.includes(pair.bodyB.label)){
-      console.log("user won")
+    if (
+      labels.includes(pair.bodyA.label) &&
+      labels.includes(pair.bodyB.label)
+    ) {
+      console.log("user won");
+      world.gravity.y = 1;
     }
   });
 });
